@@ -6,7 +6,8 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import nebula from '../img/nebula.jpg';
 import stars from '../img/stars.jpg';
 
-const monkeyUrl = new URL('../assets/monkey.glb', import.meta.url)
+// const monkeyUrl = new URL('../assets/monkey.glb', import.meta.url)
+const doggoUrl = new URL('../assets/doggo2.glb', import.meta.url)
 
 const renderer = new THREE.WebGLRenderer();
 
@@ -152,11 +153,21 @@ const sphere2 = new THREE.Mesh(sphere2Geometry, sphere2Material);
 scene.add(sphere2);
 sphere2.position.set(-5, 10, 10);
 
+let mixer;
 const assetLoader = new GLTFLoader();
-assetLoader.load(monkeyUrl.href, gltf => {
+assetLoader.load(doggoUrl.href, gltf => {
     const model = gltf.scene;
     scene.add(model);
-    model.position.set(-12, 4, 10);
+    model.position.set(10, 0, 10);
+    mixer = new THREE.AnimationMixer(model);
+    const clips = gltf.animations;
+    /* const clip = THREE.AnimationClip.findByName(clips, 'HeadAction');
+    const action = mixer.clipAction(clip);
+    action.play(); */
+    clips.forEach(clip => {
+        const action = mixer.clipAction(clip);
+        action.play();
+    });
 }, undefined, error => {
     console.log(error);
 });
@@ -199,7 +210,12 @@ const rayCaster = new THREE.Raycaster();
 const sphereId = sphere.id;
 box2.name = 'the2box'
 
+const clock = new THREE.Clock();
 function animate(time) {
+    if (mixer) {
+        mixer.update(clock.getDelta());
+    }
+
     box.rotation.x = time / 1000;
     box.rotation.y = time / 1000;
 
